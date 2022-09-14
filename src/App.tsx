@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { fetchQuizQuestions } from "./API";
 //Components
 import QuestionCard from "./components/QuestionCard";
+import ReactLoading from "react-loading";
 //Types
 import { Difficulty, QuestionState } from "./API";
 //Styles
@@ -25,14 +26,11 @@ const App = () => {
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(true);
 
-  const startTrivia = async () => {
+  const startTrivia = async (difficulty: Difficulty) => {
     setLoading(true);
     setGameOver(false);
 
-    const newQuestions = await fetchQuizQuestions(
-      TOTAL_QUESTIONS,
-      Difficulty.EASY
-    );
+    const newQuestions = await fetchQuizQuestions(TOTAL_QUESTIONS, difficulty);
 
     setQuestions(newQuestions);
     setScore(0);
@@ -70,10 +68,32 @@ const App = () => {
       <GlobalStyle />
       <Container>
         <h1>Trivia</h1>
+        {gameOver && questions.length === 0 ? (
+          <p className="modal">Choose difficulty level</p>
+        ) : userAnswers.length === TOTAL_QUESTIONS ? (
+          <p className="modal">Play again</p>
+        ) : null}
         {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
-          <button className="start" onClick={startTrivia}>
-            Start
-          </button>
+          <div className="btn-container">
+            <button
+              className="btn"
+              onClick={() => startTrivia(Difficulty.EASY)}
+            >
+              EASY
+            </button>
+            <button
+              className="btn"
+              onClick={() => startTrivia(Difficulty.MEDIUM)}
+            >
+              MEDIUM
+            </button>
+            <button
+              className="btn"
+              onClick={() => startTrivia(Difficulty.HARD)}
+            >
+              HARD
+            </button>
+          </div>
         ) : null}
 
         {!gameOver ? (
@@ -83,7 +103,11 @@ const App = () => {
           </div>
         ) : null}
 
-        {loading && <p>Loading Questions...</p>}
+        {loading && (
+          <div className="loading-container">
+            <ReactLoading type="bubbles" />
+          </div>
+        )}
 
         {!loading && !gameOver && (
           <QuestionCard
@@ -99,9 +123,11 @@ const App = () => {
         !loading &&
         userAnswers.length === number + 1 &&
         number !== TOTAL_QUESTIONS - 1 ? (
-          <button className="next" onClick={nextQuestion}>
-            Next question
-          </button>
+          <div className="btn-container">
+            <button className="btn" onClick={nextQuestion}>
+              NEXT
+            </button>
+          </div>
         ) : null}
       </Container>
     </>
